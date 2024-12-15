@@ -503,7 +503,7 @@ class PanoramaSDModel(BaseModel):
         with self.model.progress_bar(total=len(timesteps)) as progress_bar:
             for i, t in enumerate(timesteps):
                 func_params["cur_index"] = i
-                self.model.set_up_coefficients(t, self.config.sampling_method)
+                # self.model.set_up_coefficients(t, self.config.sampling_method) # TO SOLVE: AttributeError: 'SyncTweediesSD' object has no attribute 'set_up_coefficients'
 
                 if t > (1 - multiview_diffusion_end) * num_timesteps:
                     out_params = self.one_step_process(
