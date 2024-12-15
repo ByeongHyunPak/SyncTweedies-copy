@@ -159,14 +159,14 @@ class PanoramaSDModel(BaseModel):
 
     def forward_ft(
         self, 
-        canonical_input, 
+        canonical_input,   # torch.Size([1, 4, 2048, 4096])
         index, 
-        xy_map_stack=None, 
+        xy_map_stack=None, # torch.Size([8, 64, 64, 2])
         **kwargs,
     ):
         
         xy = xy_map_stack[index].to(canonical_input)
-        instance_out = remap_torch(canonical_input, xy[..., 0], xy[..., 1])
+        instance_out = remap_torch(canonical_input, xy[..., 0], xy[..., 1]) # torch.Size([1, 4, 64, 64])
         return instance_out
     
 
