@@ -53,6 +53,13 @@ if __name__ == "__main__":
         config = load_gs_config()
         model = GaussianSplattingModel(config)
 
+    elif app == "panorama_sd":
+        from synctweedies.model.panorama_sd_model import PanoramaSDModel
+        from synctweedies.config.panorama_sd_config import load_panorama_sd_config
+
+        config = load_panorama_sd_config()
+        model = PanoramaSDModel(config)
+
     else:
         raise NotImplementedError(f"{app} not implemented")
 
