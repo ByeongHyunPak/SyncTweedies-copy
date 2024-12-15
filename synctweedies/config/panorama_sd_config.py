@@ -7,12 +7,13 @@ def load_panorama_sd_config():
     
     # Diffusion Config
     parser.add_argument('--prompt', type=str, required=True)
-    parser.add_argument('--negative_prompt', type=str, default="")
+    # parser.add_argument('--negative_prompt', type=str, default="")
     parser.add_argument('--num_inference_steps', type=int, default=50)
     parser.add_argument('--guidance_scale', type=float, default=7.5)
+    ## ^- Newly added args
     # parser.add_argument('--prompt', type=str, default="a bedroom with a window")
-    # parser.add_argument('--negative_prompt', type=str, default='oversmoothed, blurry, depth of field, out of focus, low quality, bloom, glowing effect.')
-    # parser.add_argument('--steps', type=int, default=30)
+    parser.add_argument('--negative_prompt', type=str, default='oversmoothed, blurry, depth of field, out of focus, low quality, bloom, glowing effect.')
+    parser.add_argument('--steps', type=int, default=30) # TO SOLVE: AttributeError: 'Namespace' object has no attribute 'steps'
     # parser.add_argument('--guidance_scale', type=float, default=25, help='Recommend above 12 to avoid blurriness')
     parser.add_argument('--seed', type=int, default=0)
 
