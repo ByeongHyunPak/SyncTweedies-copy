@@ -3,21 +3,25 @@ import argparse
 def load_panorama_sd_config():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--app", type=str, default="panorama")
+    parser.add_argument("--app", type=str, default="panorama_sd")
     
-    # # Diffusion Config
-    parser.add_argument('--prompt', type=str, default="a bedroom with a window")
-    parser.add_argument('--negative_prompt', type=str, default='oversmoothed, blurry, depth of field, out of focus, low quality, bloom, glowing effect.')
-    parser.add_argument('--steps', type=int, default=30)
-    parser.add_argument('--guidance_scale', type=float, default=25, help='Recommend above 12 to avoid blurriness')
+    # Diffusion Config
+    parser.add_argument('--prompt', type=str, required=True)
+    parser.add_argument('--negative_prompt', type=str, default="")
+    parser.add_argument('--num_inference_steps', type=int, default=50)
+    parser.add_argument('--guidance_scale', type=float, default=7.5)
+    # parser.add_argument('--prompt', type=str, default="a bedroom with a window")
+    # parser.add_argument('--negative_prompt', type=str, default='oversmoothed, blurry, depth of field, out of focus, low quality, bloom, glowing effect.')
+    # parser.add_argument('--steps', type=int, default=30)
+    # parser.add_argument('--guidance_scale', type=float, default=25, help='Recommend above 12 to avoid blurriness')
     parser.add_argument('--seed', type=int, default=0)
 
     # ControlNet Config
-    parser.add_argument('--cond_type', type=str, default='depth', help='Support depth and normal, less multi-face in normal mode, but some times less details')
-    parser.add_argument('--conditioning_scale', type=float, default=0.7)
-    parser.add_argument('--conditioning_scale_end', type=float, default=0.9, help='Gradually increasing conditioning scale for better geometry alignment near the end')
-    parser.add_argument('--control_guidance_start', type=float, default=0.0)
-    parser.add_argument('--control_guidance_end', type=float, default=0.99)
+    # parser.add_argument('--cond_type', type=str, default='depth', help='Support depth and normal, less multi-face in normal mode, but some times less details')
+    # parser.add_argument('--conditioning_scale', type=float, default=0.7)
+    # parser.add_argument('--conditioning_scale_end', type=float, default=0.9, help='Gradually increasing conditioning scale for better geometry alignment near the end')
+    # parser.add_argument('--control_guidance_start', type=float, default=0.0)
+    # parser.add_argument('--control_guidance_end', type=float, default=0.99)
 
     # Multi-View Config
     parser.add_argument('--mvd_end', type=float, default=0.8, help='Time step to stop texture space aggregation')
@@ -43,7 +47,8 @@ def load_panorama_sd_config():
     parser.add_argument("--FOV", type=int, default=72)
     parser.add_argument("--voronoi", action="store_true", default=True) 
 
-    parser.add_argument("--model", type=str, default="controlnet") # controlnet / sd / deepfloyd
+    parser.add_argument("--model", type=str, default="sd") # controlnet / sd / deepfloyd
+    parser.add_argument('--sd_path', type=str, default="stabilityai/stable-diffusion-2-base") # stabilityai/stable-diffusion-2-base / runwayml/stable-diffusion-v1-5
     parser.add_argument("--depth_data_path", type=str, help="/PATH/TO/file.dpt")
 
     ## logging
