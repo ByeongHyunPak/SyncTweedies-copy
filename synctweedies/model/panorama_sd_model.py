@@ -392,6 +392,7 @@ class PanoramaSDModel(BaseModel):
             prompt_embeds=None,
             negative_prompt_embeds=None,
         )
+        prompt_embeds_buffer = prompt_embeds
         if do_classifier_free_guidance:
             negative_prompt_embeds, prompt_embeds = torch.chunk(prompt_embeds, 2)
         else:
@@ -430,6 +431,7 @@ class PanoramaSDModel(BaseModel):
             "generator": generator,
             "predicted_variance": None,
             "cos_weighted": True,
+            "prompt_embeds": prompt_embeds_buffer, # TO SOLVE: noise_preds_stack = noise_pred_dict["uncond"] + guidance_scale * (noise_pred_dict["text"] - noise_pred_dict["uncond"]); KeyError: 'text'
         }
         
         if case_name in instance_denoising_cases:
