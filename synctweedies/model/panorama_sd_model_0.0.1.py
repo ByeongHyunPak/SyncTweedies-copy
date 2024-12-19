@@ -21,7 +21,7 @@ from synctweedies.utils.mesh_utils import *
 from synctweedies.model.panorama_sd_model import PanoramaSDModel
 
 
-class PanoramaSDModelwithHIWYN(PanoramaSDModel):
+class PanoramaSDModel_0_0_1(PanoramaSDModel):
     def __init__(self, config):
         super().__init__(config)
     
@@ -86,3 +86,24 @@ class PanoramaSDModelwithHIWYN(PanoramaSDModel):
             screen_input, xy, pano_height, pano_width
         )
         return canonical_out, mask
+    
+    @torch.no_grad()
+    def cond_noise_upsample(self, src_noise):
+        B, C, H, W = src_noise.shape
+        up_factor = 2 ** self.up_level if self.up_level is not None else 2 ** 3
+        upscaled_means = F.interpolate(src_noise, scale_factor=(up_factor, up_factor), mode='nearest')
+
+        up_H = up_factor * H
+        up_W = up_factor * W
+
+        # 1) Unconditionally sample a discrete Nk x Nk Gaussian sample
+        raw_rand = torch.randn(B, C, up_H, up_W, device=src_noise.device)
+
+        # 2) Remove its mean from it
+        Z_mean = raw_rand.unfold(2, up_factor, up_factor).unfold(3, up_factor, up_factor).mean((4, 5))
+        Z_mean = F.interpolate(Z_mean, scale_factor=up_factor, mode='nearest')
+        mean_removed_rand = raw_rand - Z_mean
+
+        # 3) Add the pixel value to it
+        up_noise = upscaled_means / up_factor + mean_removed_rand
+        return up_noise # sqrt(N_k)* W(A_k): sub-pixel noise scaled with sqrt(N_k). So, ~ N(0, 1)
