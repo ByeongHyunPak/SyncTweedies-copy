@@ -18,10 +18,10 @@ from synctweedies.renderer.panorama.utils import *
 from synctweedies.utils.image_utils import *
 from synctweedies.utils.mesh_utils import *
 
-from synctweedies.model.panorama_sd_model import PanoramaSDModel
+from synctweedies.model.panorama_sd_model_0_0_0 import PanoramaSDModel_0_0_0
 
 
-class PanoramaSDModel_0_0_1(PanoramaSDModel):
+class PanoramaSDModel_0_0_1(PanoramaSDModel_0_0_0):
     def __init__(self, config):
         super().__init__(config)
     

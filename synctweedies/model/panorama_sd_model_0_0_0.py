@@ -19,7 +19,7 @@ from synctweedies.utils.image_utils import *
 from synctweedies.utils.mesh_utils import *
 
 
-class PanoramaSDModel(BaseModel):
+class PanoramaSDModel_0_0_0(BaseModel):
     def __init__(self, config):
         self.config = config
         self.device = torch.device(f"cuda:{self.config.gpu}")
