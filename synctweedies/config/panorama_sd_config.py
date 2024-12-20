@@ -61,6 +61,8 @@ def load_panorama_sd_config():
     parser.add_argument("--initialize_xt_from_zt", action="store_true")
     parser.add_argument("--sampling_method", type=str, default="ddim")
     
+    parser.add_argument("--version", type=str, default="0.0.0")
+
     options = parser.parse_args()
     
     return options

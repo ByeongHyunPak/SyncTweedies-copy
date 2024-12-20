@@ -54,10 +54,16 @@ if __name__ == "__main__":
         model = GaussianSplattingModel(config)
 
     elif app == "panorama_sd":
-        from synctweedies.model.panorama_sd_model import PanoramaSDModel
         from synctweedies.config.panorama_sd_config import load_panorama_sd_config
-
+        from importlib import import_module
+        
         config = load_panorama_sd_config()
+        
+        # Import the PanoramaSDModel with the given version
+        version_string = config.version.replace('.', '_')
+        pkg = import_module(f"synctweedies.model.panorama_sd_model_{version_string}")
+        PanoramaSDModel = getattr(pkg, f"PanoramaSDModel_{version_string}")
+        
         model = PanoramaSDModel(config)
 
     else:
