@@ -66,7 +66,7 @@ class PanoramaSDModel_0_0_2(PanoramaSDModel_0_0_0):
         pano = torch.zeros(1, num_channels, canonical_h, canonical_w).to(x_ts)
         pano_count = torch.zeros(1, 1, canonical_h, canonical_w, device=self.device)
         if decoding:
-            decoded_x_ts = self.decode_latents_with_fusing(x_ts)
+            decoded_x_ts = self.decode_latents_with_fusing(x_ts, xy_map_stack)
             x_ts = torch.cat(decoded_x_ts, 0).float()
             assert x_ts.shape == (
                 self.num_views,
@@ -92,7 +92,7 @@ class PanoramaSDModel_0_0_2(PanoramaSDModel_0_0_0):
         return z_t
 
     @torch.no_grad()
-    def decode_latents_with_fusing(self, x_ts):
+    def decode_latents_with_fusing(self, x_ts, xy_map_stack):
         latents = []
         custom_decoder = CustomDecoder(self.model.vae.decoder).to(self.device)
         post_quant_conv = self.model.vae.post_quant_conv.to(self.device)
@@ -110,9 +110,23 @@ class PanoramaSDModel_0_0_2(PanoramaSDModel_0_0_0):
         for i in range(self.num_views):
             latents[i] = custom_decoder(latents[i], "pre")
 
-        for i in range(self.num_views):
-            for j in range(len(custom_decoder.up_blocks)):
-                latents[i] = custom_decoder(latents[i], "up", j)
+        for i in range(len(custom_decoder.up_blocks)):
+            for j in range(self.num_views):
+                latents[j] = custom_decoder(latents[j], "up", i)
+            # latents[i]: (1, 128, 512, 512)
+            pano_latent = torch.zeros(1, *latents[0].shape[1:]).to(self.device)
+            pano_latent_count = torch.zeros(1, 1, *latents[0].shape[2:], device=self.device)
+            for j in range(self.num_views):
+                z_j, mask_j = self.inverse_ft(latents[j], j, pano_latent, xy_map_stack)
+
+                pano_latent = pano_latent + z_j
+                pano_latent_count = pano_latent_count + mask_j
+            
+            z_t = pano_latent / (pano_latent_count + 1e-8)
+            latents = [
+                self.forward_ft(z_t, j, xy_map_stack)
+                for j in range(self.num_views)
+            ]
 
         for i in range(self.num_views):
             latents[i] = custom_decoder(latents[i], "post")
@@ -124,6 +138,7 @@ class PanoramaSDModel_0_0_2(PanoramaSDModel_0_0_0):
         return latents
 
 class CustomDecoder(VAEDecoder):
+
     def __init__(self, vae_decoder):
         super().__init__()
         attributes = ["layers_per_block", "conv_in", "up_blocks", "mid_block", "conv_norm_out", "conv_act", "conv_out", "gradient_checkpointing"]
