@@ -282,6 +282,8 @@ class PanoramaSDModel_0_0_1(PanoramaSDModel_0_0_0):
                 zT = self.cond_noise_upsample(zT)
 
                 xts, _ = self.discrete_warping(zT, (512//8, 512//8))
+
+                zts = None
                 del zT
 
             else:
