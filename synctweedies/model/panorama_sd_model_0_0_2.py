@@ -106,27 +106,45 @@ class PanoramaSDModel_0_0_2(PanoramaSDModel_0_0_0):
         # Decoding
         for i in range(self.num_views):
             latents[i] = post_quant_conv(latents[i])
+        torch.cuda.empty_cache()
 
         for i in range(self.num_views):
             latents[i] = custom_decoder(latents[i], "pre")
+        torch.cuda.empty_cache()
 
         for i in range(len(custom_decoder.up_blocks)):
+            print(f"1: {torch.cuda.memory_allocated() / 2**20}GB")
             for j in range(self.num_views):
-                latents[j] = custom_decoder(latents[j], "up", i)
+                latents[j] = custom_decoder(latents[j], "up", i).float()
+            print(f"2: {torch.cuda.memory_allocated() / 2**20}GB")
             # latents[i]: (1, 128, 512, 512)
             pano_latent = torch.zeros(1, *latents[0].shape[1:]).to(self.device)
             pano_latent_count = torch.zeros(1, 1, *latents[0].shape[2:], device=self.device)
+            print(f"3: {torch.cuda.memory_allocated() / 2**20}GB")
+
             for j in range(self.num_views):
                 z_j, mask_j = self.inverse_ft(latents[j], j, pano_latent, xy_map_stack)
-
                 pano_latent = pano_latent + z_j
                 pano_latent_count = pano_latent_count + mask_j
-            
+                print(f"4: {torch.cuda.memory_allocated() / 2**20}GB")
+
+            print(f"5: {torch.cuda.memory_allocated() / 2**20}GB")
+
+            #     del z_j, mask_j
             z_t = pano_latent / (pano_latent_count + 1e-8)
-            latents = [
-                self.forward_ft(z_t, j, xy_map_stack)
-                for j in range(self.num_views)
-            ]
+            print(f"6: {torch.cuda.memory_allocated() / 2**20}GB")
+            for j in range(self.num_views):
+                print(latents[j].shape)
+                latents[j] = self.forward_ft(z_t, j, xy_map_stack).half()
+                print(latents[j].shape)
+            print(f"7: {torch.cuda.memory_allocated() / 2**20}GB")
+            # latents = [
+            #     self.forward_ft(z_t, j, xy_map_stack).half()
+            #     for j in range(self.num_views)
+            # ]
+
+            # del pano_latent, pano_latent_count, z_t
+            # torch.cuda.empty_cache()
 
         for i in range(self.num_views):
             latents[i] = custom_decoder(latents[i], "post")
